@@ -14,13 +14,27 @@ export const authController = new Elysia({ prefix: "/auth", tags: ["auth"] })
   )
   .post(
     "/login",
-    ({ login, body }) => {
-      return login(body);
+    async ({ login, body, cookie: { refreshToken: rtCookie } }) => {
+      const result = await login(body);
+      rtCookie.set({
+        value: result.refreshToken,
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: "/auth",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return {
+        message: result.message,
+        accessToken: result.accessToken,
+        user: result.user
+      }
     },
     {
       body: t.Object({
-        username: t.String(),
-        password: t.String(),
+        username: t.String({ minLength: 3, maxLength: 32 }),
+        password: t.String({ minLength: 8, maxLength: 128 }),
       }),
     },
   )
@@ -31,19 +45,48 @@ export const authController = new Elysia({ prefix: "/auth", tags: ["auth"] })
     },
     {
       body: t.Object({
-        username: t.String(),
-        password: t.String(),
-        email: t.String({ format: "email" }),
+        username: t.String({ minLength: 3, maxLength: 32 }),
+        password: t.String({ minLength: 8, maxLength: 128 }),
+        email: t.String({ format: "email", maxLength: 255 }),
       }),
     },
   )
   .post(
     "/refresh",
-    ({ refresh, body }) => {
-      return refresh(body.refreshToken);
+    async ({ refresh, cookie: { refreshToken: rtCookie }, status }) => {
+      const tokenValue= rtCookie.value;
+      if (!tokenValue) throw status(401, "No refresh token");
+      const result = await refresh(tokenValue);
+      rtCookie.set({
+        value: result.refreshToken,
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: "/auth",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return {
+        accessToken: result.accessToken,
+      }
     },
     {
-      body: t.Object({
+      cookie: t.Object({
+        refreshToken: t.String(),
+      }),
+    }
+  )
+  .post(
+    "/logout",
+    async ({ logout, cookie: { refreshToken: rtCookie }, status }) => {
+      const tokenValue= rtCookie.value;
+      if (!tokenValue) throw status(401, "No refresh token");
+      const result = await logout(tokenValue);
+      rtCookie.remove();
+      return result;
+    },
+    {
+      cookie: t.Object({
         refreshToken: t.String(),
       }),
     },

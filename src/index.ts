@@ -4,7 +4,10 @@ import { Elysia } from "elysia";
 import { authController } from "./controllers/auth";
 
 const app = new Elysia()
-  .use(cors())
+  .use(cors({
+    credentials: true,
+    origin: Bun.env.FRONTEND_URL || "http://localhost:5173"
+  }))
   .use(openapi({
     documentation: {
       info: {
