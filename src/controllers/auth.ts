@@ -21,7 +21,7 @@ export const authController = new Elysia({ prefix: "/auth", tags: ["auth"] })
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-        path: "/auth",
+        // path: "/auth",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
@@ -62,7 +62,7 @@ export const authController = new Elysia({ prefix: "/auth", tags: ["auth"] })
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-        path: "/auth",
+        // path: "/auth",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 

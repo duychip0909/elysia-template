@@ -8,6 +8,7 @@
   "dependencies": {
     "@elysiajs/bearer": "^1.4.3",
     "@elysiajs/cors": "^1.4.1",
+    "@elysiajs/cron": "^1.4.1",
     "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/openapi": "^1.4.14",
     "@prisma/adapter-pg": "^7.4.1",
